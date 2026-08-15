@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Coca-Cola | Clientes</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --coca-red:#e30016;
+    --coca-red-dark:#b3000f;
+    --bar-gray:#f2f1ef;
+    --border-gray:#dcdad7;
+    --text-dark:#2b2b2b;
+    --blue-btn:#1f6fb2;
+    --blue-btn-dark:#175a91;
+    --orange:#e8a33d;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Segoe UI", Arial, sans-serif;
+    background:#e9e9e9;
+    color:var(--text-dark);
+  }
+  /* ---- Header ---- */
+  .topbar{
+    background:linear-gradient(180deg, var(--coca-red) 0%, var(--coca-red-dark) 100%);
+    height:90px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .logo-badge{
+    width:46px;height:46px;border-radius:50%;
+    background:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:"Brush Script MT", cursive;
+    color:var(--coca-red);
+    font-size:20px;
+    font-weight:bold;
+  }
+  .logo-text{
+    font-family:"Brush Script MT", cursive;
+    color:#fff;
+    font-size:34px;
+  }
+
+  /* ---- User / region bar ---- */
+  .userbar{
+    background:#fff;
+    border-bottom:1px solid var(--border-gray);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 24px;
+  }
+  .userbar-left{
+    display:flex;align-items:center;gap:8px;
+    font-size:15px;
+  }
+  .userbar-center{
+    font-weight:600;
+    font-size:16px;
+  }
+  .userbar-right{
+    display:flex;gap:10px;
+  }
+  .icon-btn{
+    display:flex;align-items:center;gap:6px;
+    border:1px solid var(--border-gray);
+    background:#f7f7f7;
+    padding:6px 12px;
+    border-radius:3px;
+    font-size:14px;
+    cursor:pointer;
+    color:var(--text-dark);
+  }
+  .icon-btn.salir{
+    background:var(--coca-red);
+    border-color:var(--coca-red);
+    color:#fff;
+  }
+
+  /* ---- Tabs ---- */
+  .tabs{
+    background:var(--bar-gray);
+    border-bottom:1px solid var(--border-gray);
+    display:flex;
+    gap:36px;
+    padding:14px 24px;
+  }
+  .tab{
+    font-size:15px;
+    color:var(--text-dark);
+    cursor:pointer;
+    padding-bottom:6px;
+    border-bottom:3px solid transparent;
+  }
+  .tab.active{
+    border-bottom-color:var(--coca-red);
+    font-weight:600;
+  }
+
+  /* ---- Content ---- */
+  .content{
+    background:#fff;
+    margin:0 auto;
+    max-width:1400px;
+    min-height:600px;
+    padding:28px 32px 40px;
+  }
+  .content-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:20px;
+  }
+  .content-title{
+    font-size:28px;
+    font-weight:400;
+    margin:0;
+  }
+  .toolbar-btns{
+    display:flex;gap:8px;
+  }
+  .sq-btn{
+    width:38px;height:38px;
+    background:var(--blue-btn);
+    border:none;
+    border-radius:3px;
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    font-size:16px;
+  }
+  .sq-btn:hover{background:var(--blue-btn-dark);}
+
+  .results-row{
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    color:#555;
+    margin-bottom:14px;
+  }
+  .results-row select{
+    padding:4px 8px;
+    border:1px solid var(--border-gray);
+    border-radius:3px;
+  }
+
+  .table-area{
+    border-top:1px solid var(--border-gray);
+    padding-top:60px;
+    display:flex;
+    justify-content:center;
+  }
+  .no-items{
+    background:var(--orange);
+    color:#fff;
+    font-weight:600;
+    padding:10px 20px;
+    border-radius:3px;
+    font-size:15px;
+  }
+
+  /* ---- Pedidos footer ---- */
+  .pedidos-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin:40px 0 0;
+  }
+  .action-btn{
+    background:var(--blue-btn);
+    color:#fff;
+    border:none;
+    padding:9px 16px;
+    border-radius:3px;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .action-btn:hover{background:var(--blue-btn-dark);}
+  .action-btn.cancel{background:var(--blue-btn);}
+
+  .summary-row{
+    text-align:center;
+    font-weight:600;
+    font-size:15px;
+    margin:50px 0 30px;
+  }
+  .trucks-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+  }
+  .truck-block{
+    text-align:center;
+    font-size:14px;
+    font-weight:600;
+    color:#333;
+  }
+  .truck-svg{display:block;margin-top:6px;}
+
+  .hidden{display:none;}
+
+  /* ---- Import ---- */
+  .import-btn{
+    display:flex;align-items:center;gap:6px;
+    background:#3a9b3a;
+    color:#fff;
+    border:none;
+    padding:9px 16px;
+    border-radius:3px;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .import-btn:hover{background:#2f8a2f;}
+  .import-btn.csv-btn{background:#1f6fb2;}
+  .import-btn.csv-btn:hover{background:#175a91;}
+  #xlsx-input{display:none;}
+  #csv-input{display:none;}
+  .import-status{
+    font-size:13px;
+    color:#555;
+    margin-top:8px;
+  }
+  .prod-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+  }
+  .prod-table th{
+    background:var(--bar-gray);
+    text-align:left;
+    padding:10px 12px;
+    border-bottom:2px solid var(--border-gray);
+    font-weight:600;
+  }
+  .prod-table td{
+    padding:9px 12px;
+    border-bottom:1px solid var(--border-gray);
+  }
+  .prod-table tr:hover td{background:#fafafa;}
+  .prod-table input[type="number"]{
+    width:80px;
+    padding:4px 6px;
+    border:1px solid var(--border-gray);
+    border-radius:3px;
+  }
+  .remove-row{
+    background:none;border:none;color:var(--coca-red);cursor:pointer;font-size:16px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-badge">mi</div>
+      <div class="logo-text">Coca-Cola</div>
+    </div>
+  </div>
+
+  <div class="userbar">
+    <div class="userbar-left">👤 <span>deanfunes Clientes</span></div>
+    <div class="userbar-center">Stock de Región : Norte</div>
+    <div class="userbar-right">
+      <div class="icon-btn">✉</div>
+      <div class="icon-btn">🛒 0</div>
+      <div class="icon-btn">🏠 Inicio</div>
+      <div class="icon-btn salir">⏻ Salir</div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab" data-tab="historial">Historial</div>
+    <div class="tab" data-tab="pedidos">Pedidos</div>
+    <div class="tab active" data-tab="stock">Stock Cliente</div>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div class="content hidden" id="tab-historial">
+    <div class="content-header">
+      <h1 class="content-title">Historial</h1>
+      <div class="toolbar-btns">
+        <button class="sq-btn">▼</button>
+        <button class="sq-btn">🖶</button>
+        <button class="sq-btn">ⓘ</button>
+      </div>
+    </div>
+    <div class="results-row">
+      Mostrar <select><option>50</option></select> / 0 resultado(s)
+    </div>
+    <div class="table-area">
+      <div class="no-items">No existen items</div>
+    </div>
+  </div>
+
+  <!-- PEDIDOS -->
+  <div class="content hidden" id="tab-pedidos">
+    <div class="content-header">
+      <h1 class="content-title">Pedidos</h1>
+      <div class="toolbar-btns">
+        <label class="import-btn" for="xlsx-input">⬆ Importar Excel</label>
+        <input type="file" id="xlsx-input" accept=".xlsx,.xls">
+        <label class="import-btn csv-btn" for="csv-input">⬆ Importar CSV</label>
+        <input type="file" id="csv-input" accept=".csv">
+        <button class="sq-btn">🔍</button>
+        <button class="sq-btn">▼</button>
+      </div>
+    </div>
+    <div class="import-status" id="import-status"></div>
+    <div class="results-row">
+      Mostrar <select><option>50</option></select> / <span id="pedidos-count">0</span> resultado(s)
+    </div>
+    <div class="table-area" id="pedidos-table-area">
+      <div class="no-items">No existen items</div>
+    </div>
+    <div class="pedidos-actions">
+      <button class="action-btn">⬇ Bajas y Reemplazos</button>
+      <button class="action-btn">✎ Comentarios</button>
+      <button class="action-btn">💾 Enviar</button>
+      <button class="action-btn cancel">✖ Cancelar</button>
+    </div>
+    <div class="summary-row">Pallets: &nbsp;|&nbsp; Cajas: &nbsp;|&nbsp; Total Kg:</div>
+    <div class="trucks-row">
+      <div class="truck-block">
+        Picking Máximo
+        <svg class="truck-svg" width="220" height="90" viewBox="0 0 220 90">
+          <rect x="10" y="30" width="140" height="40" fill="#fff" stroke="#c00" stroke-width="3"/>
+          <path d="M150 30 h30 l20 25 v15 h-50 z" fill="#c00"/>
+          <circle cx="40" cy="75" r="10" fill="#333"/>
+          <circle cx="120" cy="75" r="10" fill="#333"/>
+          <circle cx="175" cy="75" r="10" fill="#333"/>
+        </svg>
+      </div>
+      <div class="truck-block">
+        Peso Máximo
+        <svg class="truck-svg" width="220" height="90" viewBox="0 0 220 90">
+          <rect x="10" y="30" width="140" height="40" fill="#fff" stroke="#c00" stroke-width="3"/>
+          <path d="M150 30 h30 l20 25 v15 h-50 z" fill="#c00"/>
+          <circle cx="40" cy="75" r="10" fill="#333"/>
+          <circle cx="120" cy="75" r="10" fill="#333"/>
+          <circle cx="175" cy="75" r="10" fill="#333"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- STOCK CLIENTE -->
+  <div class="content" id="tab-stock">
+    <div class="content-header">
+      <h1 class="content-title">Stock Cliente</h1>
+      <div class="toolbar-btns">
+        <button class="sq-btn">▼</button>
+        <button class="sq-btn">+</button>
+        <button class="sq-btn">ⓘ</button>
+        <button class="sq-btn">⇤</button>
+      </div>
+    </div>
+    <div class="results-row">
+      Mostrar <select><option>10</option></select> / 0 resultado(s)
+    </div>
+    <div class="table-area">
+      <div class="no-items">No existen items</div>
+    </div>
+  </div>
+
+  <script>
+    // ---- Importar XLSX de productos faltantes ----
+    const xlsxInput = document.getElementById('xlsx-input');
+    const tableArea = document.getElementById('pedidos-table-area');
+    const importStatus = document.getElementById('import-status');
+    const pedidosCount = document.getElementById('pedidos-count');
+
+    // Busca la hoja "M M" (sin importar mayúsculas/espacios); si no existe, usa la primera hoja
+    function findSheet(workbook){
+      const target = workbook.SheetNames.find(n => n.trim().toLowerCase() === 'm m');
+      return target || workbook.SheetNames[0];
+    }
+
+    // Encuentra la fila de encabezado buscando "Cód." en la columna A
+    function findHeaderRow(matrix){
+      for(let i = 0; i < matrix.length; i++){
+        const cellA = (matrix[i][0] || '').toString().trim().toLowerCase();
+        if(cellA === 'cód.' || cellA === 'cod.' || cellA === 'codigo' || cellA === 'código'){
+          return i;
+        }
+      }
+      return -1;
+    }
+
+    xlsxInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if(!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try{
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = findSheet(workbook);
+          const sheet = workbook.Sheets[sheetName];
+          const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '' });
+
+          if(rows.length === 0){
+            importStatus.textContent = 'El archivo está vacío.';
+            return;
+          }
+
+          const headerRowIdx = findHeaderRow(rows);
+          const dataStart = headerRowIdx !== -1 ? headerRowIdx + 1 : 0;
+
+          // Código = columna A · Descripción = columna B (Sabor) + columna C (Formato)
+          const dataRows = rows.slice(dataStart)
+            .filter(r => r[0] !== '' && r[0] !== null && r[0] !== undefined)
+            .map(r => {
+              const codigo = (r[0] ?? '').toString().trim();
+              const sabor = (r[1] ?? '').toString().trim();
+              const formato = (r[2] ?? '').toString().trim();
+              const descripcion = [sabor, formato].filter(Boolean).join(' ');
+              return { codigo, descripcion };
+            });
+
+          if(dataRows.length === 0){
+            importStatus.textContent = 'No se encontraron productos en la hoja "' + sheetName + '".';
+            return;
+          }
+
+          dataRows.sort((a, b) => (parseFloat(a.codigo) || 0) - (parseFloat(b.codigo) || 0));
+
+          renderProductTable(dataRows);
+          importStatus.textContent = `Importado "${file.name}" (hoja "${sheetName}") — ${dataRows.length} producto(s) cargado(s).`;
+        }catch(err){
+          importStatus.textContent = 'No se pudo leer el archivo. Verificá que sea un .xlsx válido.';
+          console.error(err);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    });
+
+    function renderProductTable(rows){
+      let html = `<table class="prod-table"><thead><tr>
+          <th>Descripción</th><th>Código</th><th>Pallet</th><th>Filas</th><th>Pack</th><th></th>
+        </tr></thead><tbody>`;
+
+      rows.forEach((row, i) => {
+        html += `<tr data-row="${i}">
+            <td>${row.descripcion}</td>
+            <td>${row.codigo}</td>
+            <td><input type="text" placeholder=""></td>
+            <td><input type="text" placeholder=""></td>
+            <td><input type="text" placeholder=""></td>
+            <td><button class="remove-row" title="Quitar">✖</button></td>
+          </tr>`;
+      });
+      html += `</tbody></table>`;
+
+      tableArea.className = '';
+      tableArea.innerHTML = html;
+      pedidosCount.textContent = rows.length;
+
+      tableArea.querySelectorAll('.remove-row').forEach(btn => {
+        btn.addEventListener('click', () => {
+          btn.closest('tr').remove();
+          const remaining = tableArea.querySelectorAll('tbody tr').length;
+          pedidosCount.textContent = remaining;
+          if(remaining === 0){
+            tableArea.className = 'table-area';
+            tableArea.innerHTML = '<div class="no-items">No existen items</div>';
+          }
+        });
+      });
+    }
+
+    // ---- Importar CSV de Código + Descripción ----
+    const csvInput = document.getElementById('csv-input');
+
+    function detectDelimiter(sampleLine){
+      const semis = (sampleLine.match(/;/g) || []).length;
+      const commas = (sampleLine.match(/,/g) || []).length;
+      return semis >= commas ? ';' : ',';
+    }
+
+    function parseCSVLine(line, delim){
+      // parser simple que respeta comillas
+      const result = [];
+      let cur = '';
+      let inQuotes = false;
+      for(let i = 0; i < line.length; i++){
+        const ch = line[i];
+        if(ch === '"'){
+          inQuotes = !inQuotes;
+        }else if(ch === delim && !inQuotes){
+          result.push(cur.trim());
+          cur = '';
+        }else{
+          cur += ch;
+        }
+      }
+      result.push(cur.trim());
+      return result;
+    }
+
+    function looksLikeHeader(cell0, cell1){
+      const c0 = (cell0 || '').toString().trim().toLowerCase();
+      const c1 = (cell1 || '').toString().trim().toLowerCase();
+      return ['codigo', 'código', 'cod', 'cód.', 'sku'].includes(c0) ||
+             ['descripcion', 'descripción', 'producto', 'articulo', 'artículo'].includes(c1);
+    }
+
+    csvInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if(!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try{
+          const text = evt.target.result.replace(/^\uFEFF/, '');
+          const lines = text.split(/\r\n|\n|\r/).filter(l => l.trim() !== '');
+          if(lines.length === 0){
+            importStatus.textContent = 'El archivo CSV está vacío.';
+            return;
+          }
+
+          const delim = detectDelimiter(lines[0]);
+          let parsed = lines.map(l => parseCSVLine(l, delim));
+
+          if(looksLikeHeader(parsed[0][0], parsed[0][1])){
+            parsed = parsed.slice(1);
+          }
+
+          const dataRows = parsed
+            .filter(r => (r[0] || '').trim() !== '')
+            .map(r => ({
+              codigo: (r[0] ?? '').trim(),
+              descripcion: (r[1] ?? '').trim()
+            }));
+
+          if(dataRows.length === 0){
+            importStatus.textContent = 'No se encontraron filas en el CSV.';
+            return;
+          }
+
+          dataRows.sort((a, b) => (parseFloat(a.codigo) || 0) - (parseFloat(b.codigo) || 0));
+
+          renderCodeDescTable(dataRows);
+          importStatus.textContent = `Importado "${file.name}" — ${dataRows.length} código(s) cargado(s).`;
+        }catch(err){
+          importStatus.textContent = 'No se pudo leer el CSV. Verificá el formato del archivo.';
+          console.error(err);
+        }
+      };
+      reader.readAsText(file, 'UTF-8');
+    });
+
+    function renderCodeDescTable(rows){
+      let html = `<table class="prod-table"><thead><tr>
+          <th>Código</th><th>Descripción</th><th></th>
+        </tr></thead><tbody>`;
+
+      rows.forEach((row, i) => {
+        html += `<tr data-row="${i}">
+            <td>${row.codigo}</td>
+            <td>${row.descripcion}</td>
+            <td><button class="remove-row" title="Quitar">✖</button></td>
+          </tr>`;
+      });
+      html += `</tbody></table>`;
+
+      tableArea.className = '';
+      tableArea.innerHTML = html;
+      pedidosCount.textContent = rows.length;
+
+      tableArea.querySelectorAll('.remove-row').forEach(btn => {
+        btn.addEventListener('click', () => {
+          btn.closest('tr').remove();
+          const remaining = tableArea.querySelectorAll('tbody tr').length;
+          pedidosCount.textContent = remaining;
+          if(remaining === 0){
+            tableArea.className = 'table-area';
+            tableArea.innerHTML = '<div class="no-items">No existen items</div>';
+          }
+        });
+      });
+    }
+
+    const tabs = document.querySelectorAll('.tab');
+    const panels = {
+      historial: document.getElementById('tab-historial'),
+      pedidos: document.getElementById('tab-pedidos'),
+      stock: document.getElementById('tab-stock'),
+    };
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        Object.values(panels).forEach(p => p.classList.add('hidden'));
+        panels[tab.dataset.tab].classList.remove('hidden');
+      });
+    });
+  </script>
+
+</body>
+</html>
