@@ -438,22 +438,22 @@
     width:fit-content;
     max-width:100%;
     border-collapse:collapse;
-    font-size:40px;
+    font-size:23px;
     table-layout:auto;
   }
   .sheet-table th:nth-child(1), .sheet-table td:nth-child(1){
     white-space:nowrap;
-    padding-right:60px;
+    padding-right:22px;
   }
   .sheet-table th:nth-child(3){
     white-space:nowrap;
-    padding-left:40px;
-    padding-right:40px;
+    padding-left:26px;
+    padding-right:26px;
   }
   .sheet-table td:nth-child(3){
     white-space:nowrap;
-    padding-left:38px;
-    padding-right:40px;
+    padding-left:12px;
+    padding-right:14px;
   }
   .sheet-table th:nth-child(2), .sheet-table td:nth-child(2){
     width:auto;
@@ -1394,8 +1394,8 @@
       let altoFilaMM = disponibleMM / filas;
       altoFilaMM = Math.max(3.2, Math.min(9, altoFilaMM)); // ni gigante con pocos ítems, ni ilegible con muchos
 
-      const fontSizePt = Math.max(6, Math.min(11, altoFilaMM * 1.15)).toFixed(1);
-      const paddingVerticalMM = Math.max(0.3, Math.min(2, altoFilaMM * 0.18)).toFixed(2);
+      const fontSizePt = Math.max(9, Math.min(14, altoFilaMM * 1.15)).toFixed(1);
+      const paddingVerticalMM = Math.max(0.6, Math.min(4, altoFilaMM * 0.18)).toFixed(2);
 
       let styleTag = document.getElementById('print-autofit-style');
       if(!styleTag){
